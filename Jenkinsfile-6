@@ -1,0 +1,30 @@
+pipeline {
+   agent none
+   stages {
+      stage('input') {
+         agent any
+         input {
+            message "What is your first name?"
+            ok "Submit"
+            parameters {
+               string(defaultValue: 'Dave', name: 'FIRST_NAME', trim: true)
+               string(defaultValue: '', description: 'Custom abort message', name: 'ABORT_MESSAGE', trim: true)
+            }
+         }
+         steps {
+            script {
+               if (env.ABORT_MESSAGE) {
+                  echo "Pipeline aborted with message: ${env.ABORT_MESSAGE}"
+                  currentBuild.result = 'ABORTED'
+                  error("Pipeline aborted by user with custom message.")
+               } else {
+                  echo "Good Morning, $FIRST_NAME"
+                  sh '''
+                     hostname
+                  '''
+               }
+            }
+         }
+      }
+   }
+}
